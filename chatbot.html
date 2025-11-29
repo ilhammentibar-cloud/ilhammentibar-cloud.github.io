@@ -2,65 +2,84 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Chat dengan Si El Nino</title>
     <style>
-        /* Reset & Base Styles */
+        /* --- Reset & Base Styles --- */
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            -webkit-tap-highlight-color: transparent;
         }
 
         body {
-            background-color: #e5ddd5; /* Warna background luar (desktop) */
+            /* Warna background luar untuk Desktop */
+            background-color: #d9dbd5; 
+            min-height: 100vh;
             display: flex;
             justify-content: center;
-            height: 100vh;
-            overflow: hidden;
+            align-items: center;
+            overflow: hidden; /* Mencegah scroll pada body utama */
         }
 
-        /* Container Utama (Simulasi Layar HP) */
+        /* --- Container Utama (Responsive) --- */
         .app-container {
-            width: 100%;
-            max-width: 480px; /* Batas lebar agar terlihat seperti mobile di desktop */
-            background-color: #efe7dd;
-            
-            /* --- BACKGROUND SEKOLAH --- */
-            /* Menggunakan linear-gradient untuk memberi efek transparan (putih 80%) agar teks tetap terbaca jelas */
-            background-image: 
-                linear-gradient(rgba(255, 255, 255, 0.85), rgba(255, 255, 255, 0.85)), 
-                url("latar.png"); /* GANTI URL INI DENGAN FOTO SEKOLAH ANDA */
-            
-            background-size: cover;     /* Agar gambar memenuhi layar */
-            background-position: center; /* Posisi gambar di tengah */
-            background-repeat: no-repeat;
-            
             display: flex;
             flex-direction: column;
             position: relative;
-            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+            background-color: #efe7dd;
+            
+            /* Background Sekolah dengan Overlay Transparan */
+            background-image: 
+                linear-gradient(rgba(255, 255, 255, 0.85), rgba(255, 255, 255, 0.85)), 
+                url("latar.png"); /* Pastikan file ini ada */
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            
+            /* Default untuk HP (Full Screen) */
+            width: 100%;
+            height: 100vh; 
+            box-shadow: none;
         }
 
-        /* Header Profil */
+        /* --- Media Query untuk Tablet & Desktop (Layar Lebar) --- */
+        @media (min-width: 768px) {
+            .app-container {
+                /* Tampilan seperti Jendela Aplikasi di Desktop */
+                width: 100%;
+                max-width: 450px; /* Lebar ideal untuk chat agar enak dibaca */
+                height: 90vh;     /* Tidak full height, memberi kesan floating window */
+                max-height: 800px;
+                border-radius: 18px; /* Sudut melengkung */
+                box-shadow: 0 10px 30px rgba(0,0,0,0.15); /* Bayangan agar terlihat timbul */
+                overflow: hidden; /* Agar radius border memotong konten anak */
+                border: 1px solid #ddd;
+            }
+        }
+
+        /* --- Header Profil --- */
         .header {
             background-color: #075e54;
-            padding: 10px 15px;
+            padding: 10px 16px;
             display: flex;
             align-items: center;
             color: white;
             z-index: 10;
+            flex-shrink: 0; /* Header tidak boleh mengecil */
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
         }
 
         .avatar-container {
             position: relative;
-            margin-right: 15px;
+            margin-right: 12px;
         }
 
         .avatar {
-            width: 45px;
-            height: 45px;
+            width: 42px;
+            height: 42px;
             border-radius: 50%;
             object-fit: cover;
             border: 1px solid rgba(255,255,255,0.3);
@@ -73,37 +92,50 @@
             right: 2px;
             width: 10px;
             height: 10px;
-            background-color: #25D366; /* Hijau Online */
+            background-color: #25D366;
             border-radius: 50%;
-            border: 2px solid #075e54;
+            border: 1.5px solid #075e54;
         }
 
         .profile-info h3 {
             font-size: 16px;
             font-weight: 600;
-            margin-bottom: 2px;
+            line-height: 1.2;
         }
 
         .profile-info p {
             font-size: 12px;
-            opacity: 0.8;
+            opacity: 0.85;
+            margin-top: 2px;
         }
 
-        /* Area Chat */
+        /* --- Area Chat --- */
         .chat-area {
             flex: 1;
-            padding: 20px 10px;
+            padding: 15px;
             overflow-y: auto;
             display: flex;
             flex-direction: column;
-            gap: 15px;
+            gap: 12px;
+            /* Scrollbar halus */
+            scrollbar-width: thin;
+            scrollbar-color: rgba(0,0,0,0.2) transparent;
+        }
+        
+        /* Custom Scrollbar Webkit */
+        .chat-area::-webkit-scrollbar {
+            width: 6px;
+        }
+        .chat-area::-webkit-scrollbar-thumb {
+            background-color: rgba(0,0,0,0.2);
+            border-radius: 3px;
         }
 
-        /* Styling Pesan (Bubbles) */
+        /* --- Styling Pesan (Bubbles) --- */
         .message-row {
             display: flex;
             align-items: flex-end;
-            margin-bottom: 5px;
+            margin-bottom: 4px;
         }
 
         .message-row.bot {
@@ -114,35 +146,37 @@
             justify-content: flex-end;
         }
 
-        /* Avatar Kecil di Samping Pesan Bot */
         .msg-avatar {
-            width: 30px;
-            height: 30px;
+            width: 28px;
+            height: 28px;
             border-radius: 50%;
             margin-right: 8px;
             object-fit: cover;
             flex-shrink: 0;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
         }
 
         .message-bubble {
-            max-width: 75%;
+            max-width: 80%; /* Sedikit lebih lebar */
             padding: 8px 12px;
             border-radius: 8px;
             position: relative;
-            font-size: 14.2px;
-            line-height: 1.4;
-            box-shadow: 0 1px 0.5px rgba(0,0,0,0.13);
+            font-size: 14.5px;
+            line-height: 1.45;
+            box-shadow: 0 1px 1px rgba(0,0,0,0.1);
             word-wrap: break-word;
         }
 
         .bot .message-bubble {
             background-color: white;
             border-top-left-radius: 0;
+            color: #111;
         }
 
         .user .message-bubble {
             background-color: #dcf8c6;
             border-top-right-radius: 0;
+            color: #111;
         }
 
         /* Waktu Pesan */
@@ -152,82 +186,98 @@
             color: #999;
             text-align: right;
             margin-top: 4px;
+            margin-bottom: -2px;
         }
 
         .user .msg-time {
-            color: #7fac75; /* Warna waktu di bubble hijau */
+            color: #7fac75;
         }
 
-        /* Link Styling */
+        /* --- Link & Button Styling --- */
         .chat-link {
             color: #039be5;
             text-decoration: none;
-            font-weight: bold;
+            font-weight: 600;
         }
         .chat-link:hover {
             text-decoration: underline;
         }
         
-        /* Tombol Notifikasi WA Khusus */
         .wa-notify-btn {
-            display: inline-block;
-            margin-top: 8px;
-            padding: 6px 12px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin-top: 10px;
+            padding: 8px 14px;
             background-color: #25D366;
             color: white;
             text-decoration: none;
-            border-radius: 15px;
+            border-radius: 20px;
             font-size: 13px;
-            font-weight: bold;
-            box-shadow: 0 1px 2px rgba(0,0,0,0.2);
-            transition: background 0.2s;
+            font-weight: 600;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+            transition: all 0.2s;
+            border: 1px solid #1fa851;
         }
         .wa-notify-btn:hover {
             background-color: #128c7e;
-            text-decoration: none;
+            transform: translateY(-1px);
         }
 
-        /* Input Area */
+        /* --- Input Area --- */
         .input-area {
-            background-color: #f0f0f0;
-            padding: 10px;
+            background-color: #f0f2f5;
+            padding: 8px 10px;
             display: flex;
             align-items: center;
+            flex-shrink: 0;
+            z-index: 10;
         }
 
         .input-box {
             flex: 1;
-            padding: 10px 15px;
-            border-radius: 20px;
-            border: none;
+            padding: 12px 16px;
+            border-radius: 24px;
+            border: 1px solid white;
             outline: none;
             font-size: 15px;
             background-color: white;
-            margin-right: 10px;
+            margin-right: 8px;
+            transition: box-shadow 0.2s;
+        }
+        
+        .input-box:focus {
+            box-shadow: 0 1px 4px rgba(0,0,0,0.1);
         }
 
         .send-btn {
             background-color: #075e54;
             color: white;
             border: none;
-            width: 40px;
-            height: 40px;
+            width: 42px;
+            height: 42px;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            transition: background 0.2s;
+            transition: background 0.2s, transform 0.1s;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.2);
         }
 
         .send-btn:hover {
             background-color: #128c7e;
+            transform: scale(1.05);
+        }
+        
+        .send-btn:active {
+            transform: scale(0.95);
         }
 
         .send-btn svg {
             width: 20px;
             height: 20px;
-            margin-left: 2px; /* Center visual icon */
+            margin-left: 2px;
         }
 
     </style>
@@ -256,7 +306,7 @@
                 <img src="sielnino.png" class="msg-avatar">
                 <div class="message-bubble">
                     Halo! Saya Si EL Nino. 👋<br>
-                    Apa kabar Mudahan anda Sehat Selalu
+                    Apa kabar? Semoga Anda sehat selalu.
                     <span class="msg-time">Sekarang</span>
                 </div>
             </div>
@@ -264,7 +314,7 @@
 
         <!-- Input Area -->
         <div class="input-area">
-            <input type="text" class="input-box" id="msgInput" placeholder="Ketik pesan..." onkeypress="handleKeyPress(event)">
+            <input type="text" class="input-box" id="msgInput" placeholder="Ketik pesan..." onkeypress="handleKeyPress(event)" autocomplete="off">
             <button class="send-btn" onclick="sendMessage()">
                 <!-- Icon Send SVG -->
                 <svg viewBox="0 0 24 24" fill="currentColor"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"></path></svg>
@@ -276,18 +326,16 @@
         // --- KONFIGURASI UTAMA ---
         const TARGET_LINK = "https://sites.google.com/view/smanegeri9pontianak/halaman-muka/elfsight-background-music-untitled-background-music-script-src";
         
-        // Ganti dengan Nomor WA Sekolah (Format: Kode Negara + Nomor, tanpa + atau 0 di depan)
-        // Contoh: 6281234567890
+        // Ganti dengan Nomor WA Sekolah (Format: Kode Negara + Nomor)
         const WA_SCHOOL_NUMBER = "6282151902710"; 
         
-        // URL Avatar (Ganti variabel ini agar semua avatar berubah sekaligus)
+        // URL Avatar
         const BOT_AVATAR_URL = "sielnino.png"; 
 
         // -------------------------
 
-        // Update gambar di header saat load
+        // Update gambar saat load
         document.getElementById('headerAvatar').src = BOT_AVATAR_URL;
-        // Update gambar di pesan awal
         document.querySelector('.msg-avatar').src = BOT_AVATAR_URL;
 
         const chatArea = document.getElementById('chatArea');
@@ -301,6 +349,7 @@
             // 1. Tampilkan pesan User
             appendMessage(text, 'user');
             msgInput.value = ""; // Clear input
+            msgInput.focus();    // Kembalikan fokus ke input
 
             // 2. Simulasi Bot mengetik dan membalas
             setTimeout(() => {
@@ -313,15 +362,14 @@
             let replyText = "";
             const lowerText = userText.toLowerCase();
 
-            // Menggunakan switch(true) untuk mengecek pola kata kunci (keyword)
             switch (true) {
                 // Case 1: Salam
-                case lowerText.includes('halo') || lowerText.includes('hai') || lowerText.includes('pagi') || lowerText.includes('siang'):
-                    replyText = "Halo! Senang bertemu Anda. Ada yang bisa saya bantu? <br><br>Ketik 'buat surat' jika ingin membuat surat.";
+                case lowerText.includes('halo') || lowerText.includes('hai') || lowerText.includes('pagi') || lowerText.includes('siang') || lowerText.includes('sore') || lowerText.includes('malam'):
+                    replyText = "Halo! Senang bertemu Anda. Ada yang bisa saya bantu? <br><br>Ketik <b>'buat surat'</b> jika ingin membuat surat.";
                     break;
                 
                 // Case 2: Perintah membuat surat (Keyword utama) + NOTIFIKASI WA
-                case lowerText.includes('surat') || lowerText.includes('buat') || lowerText.includes('link'):
+                case lowerText.includes('surat') || lowerText.includes('buat') || lowerText.includes('link') || lowerText.includes('form'):
                     // Siapkan Pesan WA Otomatis
                     const waMessage = "Halo Admin Sekolah, saya telah mengisi formulir pembuatan surat melalui website. Mohon diproses. Terima kasih.";
                     const waLink = `https://wa.me/${WA_SCHOOL_NUMBER}?text=${encodeURIComponent(waMessage)}`;
@@ -329,43 +377,46 @@
                     replyText = `Untuk membuat surat, silakan akses halaman berikut ini:<br>
                     <a href="${TARGET_LINK}" target="_blank" class="chat-link">📄 Klik di sini untuk Membuat Surat</a><br><br>
                     
-                    <strong>Anda Sudah selesai mengisi?</strong><br>
+                    <strong>Sudah selesai mengisi?</strong><br>
                     Silakan lapor ke Admin melalui WhatsApp:<br>
-                    <a href="${waLink}" target="_blank" class="wa-notify-btn">📱 Kirim Notifikasi ke WA Sekolah</a><br><br>
+                    <a href="${waLink}" target="_blank" class="wa-notify-btn">📱 Lapor ke WA Sekolah</a><br><br>
                     
-                    Anda Bingung Cara nya? Ketik <b>'tutorial'</b> untuk info akun.`;
+                    Bingung caranya? Ketik <b>'tutorial'</b> untuk info akun.`;
                     break;
 
                 // Case 3: Tutorial / Login Info
-                case lowerText.includes('tutorial') || lowerText.includes('cara') || lowerText.includes('login') || lowerText.includes('akun') || lowerText.includes('password') || lowerText.includes('pw'):
+                case lowerText.includes('tutorial') || lowerText.includes('cara') || lowerText.includes('login') || lowerText.includes('akun') || lowerText.includes('password') || lowerText.includes('pw') || lowerText.includes('user'):
                     replyText = `<strong>Panduan Login Pembuatan Surat:</strong><br><br>
-                    1. <strong>Jika Anda Seorang Siswa:</strong><br>
+                    1. <strong>Jika Anda Siswa:</strong><br>
                     User : SISWA<br>
                     Pw : SISWA<br><br>
-                    2. <strong>Jika Anda Seorang Guru:</strong><br>
+                    2. <strong>Jika Anda Guru:</strong><br>
                     User : GURU<br>
                     Pw : GURU<br><br>
-                    3. <strong>Alumni / Mahasiswa / Orang Tua / Umum:</strong><br>
+                    3. <strong>Alumni / Mahasiswa / Umum:</strong><br>
                     User : UMUM<br>
                     Pw : UMUM<br><br>
-                    Silahkan Pilih Surat yang anda Butuhkan<br>
-                    kemudian isi formnya dan kirim setelah kirim<br>
-                    silahkan klik link lapor ke admin pada pesan sebelumnya`;
+                    <em>Pilih jenis surat yang Anda butuhkan, isi formnya, lalu lapor ke admin via WA.</em>`;
                     break;
 
                 // Case 4: Identitas
                 case lowerText.includes('siapa') || lowerText.includes('nama'):
-                    replyText = "Saya Si El Nino, asisten virtual Anda untuk urusan administrasi.";
+                    replyText = "Saya SI El Nino, asisten virtual Anda untuk urusan administrasi SMAN 9 Pontianak.";
                     break;
 
                 // Case 5: Terima kasih
-                case lowerText.includes('makasih') || lowerText.includes('terima kasih'):
+                case lowerText.includes('makasih') || lowerText.includes('terima kasih') || lowerText.includes('thanks'):
                     replyText = "Sama-sama! Senang bisa membantu. 😊";
+                    break;
+                
+                // Case 6: Kabar
+                case lowerText.includes('kabar') || lowerText.includes('sehat'):
+                    replyText = "Saya hanyalah program komputer, tapi sistem saya berjalan lancar! Semoga Anda juga sehat selalu.";
                     break;
 
                 // Default: Jika tidak mengerti
                 default:
-                    replyText = "Maaf, saya belum mengerti perintah tersebut. Silakan ketik 'surat' untuk link, atau 'tutorial' untuk info login.";
+                    replyText = "Maaf, saya belum mengerti maksud Anda. <br>Silakan ketik <b>'surat'</b> untuk link pembuatan surat, atau <b>'tutorial'</b> untuk info login.";
                     break;
             }
             
@@ -378,10 +429,11 @@
             rowDiv.classList.add('message-row', sender);
 
             let contentHtml = '';
-            const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            // Ambil waktu saat ini
+            const now = new Date();
+            const time = now.getHours().toString().padStart(2, '0') + ":" + now.getMinutes().toString().padStart(2, '0');
 
             if (sender === 'bot') {
-                // Jika Bot, tambahkan avatar di sebelah kiri bubble
                 contentHtml += `<img src="${BOT_AVATAR_URL}" class="msg-avatar">`;
                 contentHtml += `
                     <div class="message-bubble">
@@ -390,7 +442,6 @@
                     </div>
                 `;
             } else {
-                // Jika User, hanya bubble
                 contentHtml += `
                     <div class="message-bubble">
                         ${text}
@@ -403,6 +454,10 @@
             chatArea.appendChild(rowDiv);
             
             // Auto scroll ke bawah
+            scrollToBottom();
+        }
+
+        function scrollToBottom() {
             chatArea.scrollTop = chatArea.scrollHeight;
         }
 
@@ -412,6 +467,10 @@
                 sendMessage();
             }
         }
+        
+        // Fix untuk tampilan mobile keyboard (resize event)
+        window.addEventListener('resize', scrollToBottom);
+
     </script>
 </body>
 </html>
